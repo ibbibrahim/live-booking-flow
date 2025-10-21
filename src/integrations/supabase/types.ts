@@ -14,16 +14,236 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      requests: {
+        Row: {
+          air_date_time: string
+          booking_type: Database["public"]["Enums"]["booking_type"]
+          compliance_tags: string | null
+          created_at: string | null
+          created_by: string
+          guest_contact: string | null
+          guest_name: string | null
+          id: string
+          inews_rundown_id: string | null
+          ingest_not_done_reason: string | null
+          ingest_status: string | null
+          key_fill: Database["public"]["Enums"]["key_fill"] | null
+          language: Database["public"]["Enums"]["language"]
+          newsroom_ticket: string | null
+          noc_acknowledged: boolean | null
+          noc_assigned_resources: string | null
+          noc_clarification: string | null
+          noc_forward_to_ingest: Database["public"]["Enums"]["yes_no"] | null
+          noc_required: Database["public"]["Enums"]["yes_no"]
+          notes: string | null
+          priority: Database["public"]["Enums"]["priority"]
+          program_segment: string
+          resources_needed: string | null
+          return_path: Database["public"]["Enums"]["return_path"] | null
+          rundown_position: string | null
+          source_type: Database["public"]["Enums"]["source_type"] | null
+          state: Database["public"]["Enums"]["workflow_state"]
+          story_slug: string | null
+          title: string
+          updated_at: string | null
+          vmix_input_number: string | null
+        }
+        Insert: {
+          air_date_time: string
+          booking_type: Database["public"]["Enums"]["booking_type"]
+          compliance_tags?: string | null
+          created_at?: string | null
+          created_by: string
+          guest_contact?: string | null
+          guest_name?: string | null
+          id?: string
+          inews_rundown_id?: string | null
+          ingest_not_done_reason?: string | null
+          ingest_status?: string | null
+          key_fill?: Database["public"]["Enums"]["key_fill"] | null
+          language: Database["public"]["Enums"]["language"]
+          newsroom_ticket?: string | null
+          noc_acknowledged?: boolean | null
+          noc_assigned_resources?: string | null
+          noc_clarification?: string | null
+          noc_forward_to_ingest?: Database["public"]["Enums"]["yes_no"] | null
+          noc_required: Database["public"]["Enums"]["yes_no"]
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["priority"]
+          program_segment: string
+          resources_needed?: string | null
+          return_path?: Database["public"]["Enums"]["return_path"] | null
+          rundown_position?: string | null
+          source_type?: Database["public"]["Enums"]["source_type"] | null
+          state?: Database["public"]["Enums"]["workflow_state"]
+          story_slug?: string | null
+          title: string
+          updated_at?: string | null
+          vmix_input_number?: string | null
+        }
+        Update: {
+          air_date_time?: string
+          booking_type?: Database["public"]["Enums"]["booking_type"]
+          compliance_tags?: string | null
+          created_at?: string | null
+          created_by?: string
+          guest_contact?: string | null
+          guest_name?: string | null
+          id?: string
+          inews_rundown_id?: string | null
+          ingest_not_done_reason?: string | null
+          ingest_status?: string | null
+          key_fill?: Database["public"]["Enums"]["key_fill"] | null
+          language?: Database["public"]["Enums"]["language"]
+          newsroom_ticket?: string | null
+          noc_acknowledged?: boolean | null
+          noc_assigned_resources?: string | null
+          noc_clarification?: string | null
+          noc_forward_to_ingest?: Database["public"]["Enums"]["yes_no"] | null
+          noc_required?: Database["public"]["Enums"]["yes_no"]
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["priority"]
+          program_segment?: string
+          resources_needed?: string | null
+          return_path?: Database["public"]["Enums"]["return_path"] | null
+          rundown_position?: string | null
+          source_type?: Database["public"]["Enums"]["source_type"] | null
+          state?: Database["public"]["Enums"]["workflow_state"]
+          story_slug?: string | null
+          title?: string
+          updated_at?: string | null
+          vmix_input_number?: string | null
+        }
+        Relationships: []
+      }
+      resource_allocations: {
+        Row: {
+          allocated_at: string | null
+          allocated_by: string
+          details: string
+          id: string
+          request_id: string
+          resource_type: string
+        }
+        Insert: {
+          allocated_at?: string | null
+          allocated_by: string
+          details: string
+          id?: string
+          request_id: string
+          resource_type: string
+        }
+        Update: {
+          allocated_at?: string | null
+          allocated_by?: string
+          details?: string
+          id?: string
+          request_id?: string
+          resource_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_allocations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workflow_transitions: {
+        Row: {
+          actor_id: string
+          from_state: Database["public"]["Enums"]["workflow_state"] | null
+          id: string
+          notes: string | null
+          request_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          timestamp: string | null
+          to_state: Database["public"]["Enums"]["workflow_state"]
+        }
+        Insert: {
+          actor_id: string
+          from_state?: Database["public"]["Enums"]["workflow_state"] | null
+          id?: string
+          notes?: string | null
+          request_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          timestamp?: string | null
+          to_state: Database["public"]["Enums"]["workflow_state"]
+        }
+        Update: {
+          actor_id?: string
+          from_state?: Database["public"]["Enums"]["workflow_state"] | null
+          id?: string
+          notes?: string | null
+          request_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          timestamp?: string | null
+          to_state?: Database["public"]["Enums"]["workflow_state"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_transitions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "Booking" | "NOC" | "Ingest" | "Admin"
+      booking_type: "Incoming Feed" | "Guest for iNEWS Rundown"
+      key_fill: "None" | "Key" | "Fill"
+      language: "English" | "Arabic"
+      priority: "Normal" | "High" | "Urgent"
+      return_path: "Enabled" | "Disabled"
+      source_type: "vMix" | "SRT" | "Satellite"
+      workflow_state:
+        | "Draft"
+        | "Submitted"
+        | "With NOC"
+        | "Clarification Requested"
+        | "Resources Added"
+        | "With Ingest"
+        | "Completed"
+        | "Not Done"
+      yes_no: "Yes" | "No"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +370,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["Booking", "NOC", "Ingest", "Admin"],
+      booking_type: ["Incoming Feed", "Guest for iNEWS Rundown"],
+      key_fill: ["None", "Key", "Fill"],
+      language: ["English", "Arabic"],
+      priority: ["Normal", "High", "Urgent"],
+      return_path: ["Enabled", "Disabled"],
+      source_type: ["vMix", "SRT", "Satellite"],
+      workflow_state: [
+        "Draft",
+        "Submitted",
+        "With NOC",
+        "Clarification Requested",
+        "Resources Added",
+        "With Ingest",
+        "Completed",
+        "Not Done",
+      ],
+      yes_no: ["Yes", "No"],
+    },
   },
 } as const
