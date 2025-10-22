@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, userRole } = useAuth();
+  const { user, userRole, loading: authLoading } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterState, setFilterState] = useState<WorkflowState | 'All'>('All');
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
@@ -23,10 +23,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchRequests();
-    }
-  }, [user, userRole]);
+    // Fetch requests even if not authenticated (will show empty due to RLS)
+    fetchRequests();
+  }, []);
 
   const fetchRequests = async () => {
     try {
@@ -142,11 +141,23 @@ const Dashboard = () => {
     </div>
   );
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[400px]">
           <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // If no user, show message to login
+  if (!user) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <p className="text-muted-foreground">Please log in to access the dashboard</p>
+          <Button onClick={() => navigate('/auth')}>Go to Login</Button>
         </div>
       </Layout>
     );

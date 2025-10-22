@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import RequestForm from "./pages/RequestForm";
 import RequestDetail from "./pages/RequestDetail";
 import AdminDashboard from "./pages/AdminDashboard";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ const App = () => (
       <Sonner />
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/auth" element={<Auth />} />
         <Route path="/requests" element={<Dashboard />} />
         <Route path="/request/new" element={<RequestForm />} />
         <Route path="/request/:id" element={<RequestDetail />} />
