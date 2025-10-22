@@ -8,12 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookingType, Language, Priority, SourceType, ReturnPath, KeyFill, YesNo } from '@/types/workflow';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const RequestForm = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
   const [bookingType, setBookingType] = useState<BookingType>('Incoming Feed');
   
   // Common fields
@@ -41,39 +45,89 @@ const RequestForm = () => {
   const [storySlug, setStorySlug] = useState('');
   const [rundownPosition, setRundownPosition] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const requestData = {
-      bookingType,
+  const handleSubmit = async (isDraft: boolean) => {
+    if (!user) {
+      toast.error('You must be logged in to create a request');
+      return;
+    }
+
+    if (!title || !programSegment || !airDateTime) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setSubmitting(true);
+
+    const baseData = {
+      booking_type: bookingType,
       title,
-      programSegment,
-      airDateTime,
+      program_segment: programSegment,
+      air_date_time: airDateTime,
       language,
       priority,
-      nocRequired,
-      resourcesNeeded,
-      newsroomTicket,
-      complianceTags,
+      noc_required: nocRequired,
+      resources_needed: resourcesNeeded,
+      newsroom_ticket: newsroomTicket,
+      compliance_tags: complianceTags,
       notes,
-      ...(bookingType === 'Incoming Feed' && {
-        sourceType,
-        vmixInputNumber,
-        returnPath,
-        keyFill,
-      }),
-      ...(bookingType === 'Guest for iNEWS Rundown' && {
-        guestName,
-        guestContact,
-        inewsRundownId,
-        storySlug,
-        rundownPosition,
-      }),
+      created_by: user.id,
+      state: isDraft ? 'Draft' : 'Submitted',
     };
-    
-    console.log('Submitting request:', requestData);
-    toast.success('Request submitted successfully!');
-    navigate('/');
+
+    const requestData = bookingType === 'Incoming Feed'
+      ? {
+          ...baseData,
+          source_type: sourceType,
+          vmix_input_number: vmixInputNumber || null,
+          return_path: returnPath,
+          key_fill: keyFill,
+        }
+      : {
+          ...baseData,
+          guest_name: guestName,
+          guest_contact: guestContact,
+          inews_rundown_id: inewsRundownId,
+          story_slug: storySlug,
+          rundown_position: rundownPosition,
+        };
+
+    try {
+      const { data, error } = await supabase
+        .from('requests')
+        .insert([requestData as any])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Create workflow transition if submitted
+      if (!isDraft) {
+        await supabase.from('workflow_transitions').insert([{
+          request_id: data.id,
+          from_state: 'Draft',
+          to_state: (nocRequired === 'Yes' ? 'With NOC' : 'Submitted') as any,
+          actor_id: user.id,
+          role: 'Booking',
+          notes: 'Initial submission',
+        }]);
+
+        // Update request state if NOC required
+        if (nocRequired === 'Yes') {
+          await supabase
+            .from('requests')
+            .update({ state: 'With NOC' })
+            .eq('id', data.id);
+        }
+      }
+
+      toast.success(isDraft ? 'Request saved as draft' : 'Request submitted successfully');
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error creating request:', error);
+      toast.error(error.message || 'Failed to create request');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getPayloadPreview = () => {
@@ -119,7 +173,7 @@ const RequestForm = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div>
           <Tabs defaultValue="metadata" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="metadata">Request & Metadata</TabsTrigger>
@@ -429,15 +483,19 @@ const RequestForm = () => {
           </Tabs>
 
           <div className="flex justify-end gap-3 mt-6">
-            <Button type="button" variant="outline" onClick={() => navigate('/')}>
+            <Button type="button" variant="outline" onClick={() => navigate('/')} disabled={submitting}>
               Cancel
             </Button>
-            <Button type="submit" className="gap-2">
+            <Button type="button" variant="outline" onClick={() => handleSubmit(true)} disabled={submitting} className="gap-2">
+              <Save className="h-4 w-4" />
+              Save as Draft
+            </Button>
+            <Button type="button" onClick={() => handleSubmit(false)} disabled={submitting} className="gap-2">
               <Send className="h-4 w-4" />
               Submit Request
             </Button>
           </div>
-        </form>
+        </div>
       </div>
     </Layout>
   );
