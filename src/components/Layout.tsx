@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/requests', label: 'Requests', icon: FileText },
   { path: '/admin', label: 'Admin', icon: Settings },
 ];
@@ -32,7 +32,8 @@ export const Layout = ({ children }: LayoutProps) => {
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname === item.path || 
+                  (item.path === '/dashboard' && (location.pathname === '/' || location.pathname === '/requests'));
                 return (
                   <Link
                     key={item.path}
@@ -63,7 +64,8 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="flex items-center justify-around h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || 
+              (item.path === '/dashboard' && (location.pathname === '/' || location.pathname === '/requests'));
             return (
               <Link
                 key={item.path}

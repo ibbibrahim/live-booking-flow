@@ -11,11 +11,10 @@ import { WorkflowState, Priority } from '@/types/workflow';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, userRole, loading: authLoading } = useAuth();
+  // Temporarily disable auth for demo purposes
+  const userRole = 'Admin'; // Mock role for testing
   const [searchTerm, setSearchTerm] = useState('');
   const [filterState, setFilterState] = useState<WorkflowState | 'All'>('All');
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
@@ -23,7 +22,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch requests even if not authenticated (will show empty due to RLS)
     fetchRequests();
   }, []);
 
@@ -48,7 +46,8 @@ const Dashboard = () => {
 
     // Role-based filtering
     if (roleFilter === 'booking') {
-      filtered = filtered.filter(r => r.created_by === user?.id);
+      // Show all requests for booking view
+      filtered = requests;
     } else if (roleFilter === 'noc') {
       filtered = filtered.filter(r => 
         r.noc_required === 'Yes' && 
@@ -141,23 +140,11 @@ const Dashboard = () => {
     </div>
   );
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[400px]">
           <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </Layout>
-    );
-  }
-
-  // If no user, show message to login
-  if (!user) {
-    return (
-      <Layout>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-          <p className="text-muted-foreground">Please log in to access the dashboard</p>
-          <Button onClick={() => navigate('/auth')}>Go to Login</Button>
         </div>
       </Layout>
     );
@@ -172,12 +159,10 @@ const Dashboard = () => {
             <h2 className="text-3xl font-bold text-foreground">Workflow Dashboard</h2>
             <p className="text-muted-foreground mt-1">Manage booking requests across teams</p>
           </div>
-          {(userRole === 'Booking' || userRole === 'Admin') && (
-            <Button onClick={() => navigate('/request/new')} className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Request
-            </Button>
-          )}
+          <Button onClick={() => navigate('/request/new')} className="gap-2">
+            <Plus className="h-4 w-4" />
+            New Request
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -259,33 +244,30 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs for different roles */}
-        <Tabs defaultValue="booking" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="booking">My Requests</TabsTrigger>
-            {(userRole === 'NOC' || userRole === 'Admin') && (
-              <TabsTrigger value="noc">NOC Queue</TabsTrigger>
-            )}
-            {(userRole === 'Ingest' || userRole === 'Admin') && (
-              <TabsTrigger value="ingest">Ingest Queue</TabsTrigger>
-            )}
+        {/* Tabs for different views */}
+        <Tabs defaultValue="all" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="all">All Requests</TabsTrigger>
+            <TabsTrigger value="booking">Booking Requests</TabsTrigger>
+            <TabsTrigger value="noc">NOC Queue</TabsTrigger>
+            <TabsTrigger value="ingest">Ingest Queue</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="all">
+            <RequestsList requests={getFilteredRequests()} />
+          </TabsContent>
 
           <TabsContent value="booking">
             <RequestsList requests={bookingRequests} />
           </TabsContent>
 
-          {(userRole === 'NOC' || userRole === 'Admin') && (
-            <TabsContent value="noc">
-              <RequestsList requests={nocRequests} />
-            </TabsContent>
-          )}
+          <TabsContent value="noc">
+            <RequestsList requests={nocRequests} />
+          </TabsContent>
 
-          {(userRole === 'Ingest' || userRole === 'Admin') && (
-            <TabsContent value="ingest">
-              <RequestsList requests={ingestRequests} />
-            </TabsContent>
-          )}
+          <TabsContent value="ingest">
+            <RequestsList requests={ingestRequests} />
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>

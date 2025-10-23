@@ -12,11 +12,8 @@ import { ArrowLeft, Send, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-
 const RequestForm = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [bookingType, setBookingType] = useState<BookingType>('Incoming Feed');
   
@@ -46,10 +43,8 @@ const RequestForm = () => {
   const [rundownPosition, setRundownPosition] = useState('');
 
   const handleSubmit = async (isDraft: boolean) => {
-    if (!user) {
-      toast.error('You must be logged in to create a request');
-      return;
-    }
+    // Temporary mock user ID for testing without auth
+    const mockUserId = '00000000-0000-0000-0000-000000000000';
 
     if (!title || !programSegment || !airDateTime) {
       toast.error('Please fill in all required fields');
@@ -70,7 +65,7 @@ const RequestForm = () => {
       newsroom_ticket: newsroomTicket,
       compliance_tags: complianceTags,
       notes,
-      created_by: user.id,
+      created_by: mockUserId,
       state: isDraft ? 'Draft' : 'Submitted',
     };
 
@@ -106,7 +101,7 @@ const RequestForm = () => {
           request_id: data.id,
           from_state: 'Draft',
           to_state: (nocRequired === 'Yes' ? 'With NOC' : 'Submitted') as any,
-          actor_id: user.id,
+          actor_id: mockUserId,
           role: 'Booking',
           notes: 'Initial submission',
         }]);
@@ -121,7 +116,7 @@ const RequestForm = () => {
       }
 
       toast.success(isDraft ? 'Request saved as draft' : 'Request submitted successfully');
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Error creating request:', error);
       toast.error(error.message || 'Failed to create request');
@@ -164,7 +159,7 @@ const RequestForm = () => {
     <Layout>
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate('/')}>
+          <Button variant="outline" size="icon" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
