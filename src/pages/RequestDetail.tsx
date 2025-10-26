@@ -9,48 +9,52 @@ import { ArrowLeft, Calendar, User, Radio, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { NOCActions } from '@/components/NOCActions';
+import { IngestActions } from '@/components/IngestActions';
+import { useAuth } from '@/hooks/useAuth';
 
 const RequestDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { userRole } = useAuth();
   
   const [request, setRequest] = useState<any>(null);
   const [transitions, setTransitions] = useState<any[]>([]);
   const [resources, setResources] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchRequestData = async () => {
+    if (!id) return;
+
+    setLoading(true);
+    
+    // Fetch request
+    const { data: requestData } = await supabase
+      .from('requests')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    // Fetch transitions
+    const { data: transitionsData } = await supabase
+      .from('workflow_transitions')
+      .select('*')
+      .eq('request_id', id)
+      .order('timestamp', { ascending: false });
+
+    // Fetch resources
+    const { data: resourcesData } = await supabase
+      .from('resource_allocations')
+      .select('*')
+      .eq('request_id', id);
+
+    setRequest(requestData);
+    setTransitions(transitionsData || []);
+    setResources(resourcesData || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchRequestData = async () => {
-      if (!id) return;
-
-      setLoading(true);
-      
-      // Fetch request
-      const { data: requestData } = await supabase
-        .from('requests')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-
-      // Fetch transitions
-      const { data: transitionsData } = await supabase
-        .from('workflow_transitions')
-        .select('*')
-        .eq('request_id', id)
-        .order('timestamp', { ascending: false });
-
-      // Fetch resources
-      const { data: resourcesData } = await supabase
-        .from('resource_allocations')
-        .select('*')
-        .eq('request_id', id);
-
-      setRequest(requestData);
-      setTransitions(transitionsData || []);
-      setResources(resourcesData || []);
-      setLoading(false);
-    };
-
     fetchRequestData();
   }, [id]);
 
@@ -311,6 +315,24 @@ const RequestDetail = () => {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {/* NOC Actions - Show for NOC role when state is appropriate */}
+            {userRole === 'NOC' && ['Submitted', 'With NOC', 'Clarification Requested'].includes(request?.state) && (
+              <NOCActions 
+                requestId={id!} 
+                currentState={request.state}
+                onUpdate={fetchRequestData}
+              />
+            )}
+
+            {/* Ingest Actions - Show for Ingest role when state is With Ingest */}
+            {userRole === 'Ingest' && request?.state === 'With Ingest' && (
+              <IngestActions 
+                requestId={id!} 
+                currentState={request.state}
+                onUpdate={fetchRequestData}
+              />
             )}
 
           </div>
