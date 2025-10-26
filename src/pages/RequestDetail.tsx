@@ -317,8 +317,8 @@ const RequestDetail = () => {
               </Card>
             )}
 
-            {/* NOC Actions - Show for NOC role when state is appropriate */}
-            {userRole === 'NOC' && ['Submitted', 'With NOC', 'Clarification Requested'].includes(request?.state) && (
+            {/* NOC Actions - Show when state is appropriate */}
+            {['Submitted', 'With NOC', 'Clarification Requested'].includes(request?.state) && (
               <NOCActions 
                 requestId={id!} 
                 currentState={request.state}
@@ -326,8 +326,8 @@ const RequestDetail = () => {
               />
             )}
 
-            {/* Ingest Actions - Show for Ingest role when state is With Ingest */}
-            {userRole === 'Ingest' && request?.state === 'With Ingest' && (
+            {/* Ingest Actions - Show when state is With Ingest */}
+            {request?.state === 'With Ingest' && (
               <IngestActions 
                 requestId={id!} 
                 currentState={request.state}
