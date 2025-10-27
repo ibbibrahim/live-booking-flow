@@ -42,7 +42,7 @@ const AdminDashboard = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Admin Dashboard</h2>
+          <h2 className="text-3xl font-bold text-foreground">Admin Dashboards</h2>
           <p className="text-muted-foreground mt-1">System-wide analytics and team performance</p>
         </div>
 
