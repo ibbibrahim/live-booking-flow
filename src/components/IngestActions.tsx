@@ -81,7 +81,6 @@ export const IngestActions = ({ requestId, currentState, onUpdate }: IngestActio
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">—</SelectItem>
               <SelectItem value="Completed">Completed</SelectItem>
               <SelectItem value="Not Done">Not Done</SelectItem>
             </SelectContent>
