@@ -11,12 +11,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { NOCActions } from '@/components/NOCActions';
 import { IngestActions } from '@/components/IngestActions';
-import { useAuth } from '@/hooks/useAuth';
 
 const RequestDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { userRole } = useAuth();
   
   const [request, setRequest] = useState<any>(null);
   const [transitions, setTransitions] = useState<any[]>([]);
