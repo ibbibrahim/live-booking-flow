@@ -10,6 +10,9 @@ import RequestDetail from "./pages/RequestDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Booking from "./pages/Booking";
+import NOC from "./pages/NOC";
+import Ingest from "./pages/Ingest";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +29,9 @@ const App = () => (
         <Route path="/request/new" element={<RequestForm />} />
         <Route path="/request/:id" element={<RequestDetail />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/booking" element={<Booking />} />
+        <Route path="/noc" element={<NOC />} />
+        <Route path="/ingest" element={<Ingest />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
