@@ -10,6 +10,8 @@ import { WorkflowState, Priority } from '@/types/workflow';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealtimeRequests } from '@/hooks/useRealtimeRequests';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -25,6 +27,23 @@ const Dashboard = () => {
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  const { isConnected } = useRealtimeRequests({
+    onRequestCreated: (data) => {
+      console.log('New request created:', data);
+      setRequests(prev => [data, ...prev]);
+    },
+    onRequestUpdated: (data) => {
+      console.log('Request updated:', data);
+      setRequests(prev => 
+        prev.map(req => req.id === data.id ? { ...req, ...data } : req)
+      );
+    },
+    onRequestDeleted: (data) => {
+      console.log('Request deleted:', data);
+      setRequests(prev => prev.filter(req => req.id !== data.id));
+    },
+  });
 
   const fetchRequests = async () => {
     try {

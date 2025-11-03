@@ -1,10 +1,41 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { FileText, Upload, HardDrive } from 'lucide-react';
+import { useRealtimeRequests } from '@/hooks/useRealtimeRequests';
+import { supabase } from '@/integrations/supabase/client';
 
 const Ingest = () => {
+  const [activeIngests, setActiveIngests] = useState(0);
+  const [queued, setQueued] = useState(0);
+
+  useEffect(() => {
+    const fetchIngestData = async () => {
+      const { data } = await supabase
+        .from('requests')
+        .select('*')
+        .eq('state', 'With Ingest');
+      
+      if (data) {
+        setQueued(data.length);
+      }
+    };
+
+    fetchIngestData();
+  }, []);
+
+  useRealtimeRequests({
+    onRequestUpdated: (data) => {
+      if (data.state === 'With Ingest') {
+        setQueued(prev => prev + 1);
+      } else if (data.state === 'Completed') {
+        setQueued(prev => Math.max(0, prev - 1));
+      }
+    },
+  });
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -24,7 +55,7 @@ const Ingest = () => {
               <Upload className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{activeIngests}</div>
               <p className="text-xs text-muted-foreground">Currently processing</p>
             </CardContent>
           </Card>
@@ -35,7 +66,7 @@ const Ingest = () => {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{queued}</div>
               <p className="text-xs text-muted-foreground">Waiting to process</p>
             </CardContent>
           </Card>

@@ -1,9 +1,42 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Radio, AlertCircle } from 'lucide-react';
+import { useRealtimeRequests } from '@/hooks/useRealtimeRequests';
+import { supabase } from '@/integrations/supabase/client';
 
 const NOC = () => {
+  const [activeStreams, setActiveStreams] = useState(0);
+  const [scheduled, setScheduled] = useState(0);
+  const [alerts, setAlerts] = useState(0);
+
+  useEffect(() => {
+    const fetchNOCData = async () => {
+      const { data } = await supabase
+        .from('requests')
+        .select('*')
+        .in('state', ['Submitted', 'With NOC', 'Clarification Requested']);
+      
+      if (data) {
+        setScheduled(data.length);
+      }
+    };
+
+    fetchNOCData();
+  }, []);
+
+  useRealtimeRequests({
+    onRequestCreated: (data) => {
+      if (data.state === 'Submitted') {
+        setScheduled(prev => prev + 1);
+      }
+    },
+    onRequestUpdated: (data) => {
+      console.log('NOC received update:', data);
+    },
+  });
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -23,7 +56,7 @@ const NOC = () => {
               <Radio className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{activeStreams}</div>
               <p className="text-xs text-muted-foreground">Currently broadcasting</p>
             </CardContent>
           </Card>
@@ -34,7 +67,7 @@ const NOC = () => {
               <Radio className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{scheduled}</div>
               <p className="text-xs text-muted-foreground">Upcoming broadcasts</p>
             </CardContent>
           </Card>
@@ -45,7 +78,7 @@ const NOC = () => {
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{alerts}</div>
               <p className="text-xs text-muted-foreground">Active alerts</p>
             </CardContent>
           </Card>

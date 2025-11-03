@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Radio, FileText, Calendar, Bell, Moon, Sun } from 'lucide-react';
+import { Radio, FileText, Calendar, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/components/ui/button';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface LayoutProps {
   children: ReactNode;
@@ -68,9 +69,7 @@ export const Layout = ({ children }: LayoutProps) => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Bell className="h-5 w-5" />
-                </Button>
+                <NotificationCenter />
                 <Button variant="ghost" size="icon" onClick={toggleTheme}>
                   {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
                 </Button>
