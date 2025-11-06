@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Radio, FileText, Calendar, Moon, Sun } from 'lucide-react';
+import { Radio, FileText, Calendar, Moon, Sun, Film } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/components/ui/button';
 import { NotificationCenter } from '@/components/NotificationCenter';
@@ -14,6 +14,7 @@ const sidebarItems = [
   { path: '/booking', label: 'Booking', icon: Calendar },
   { path: '/noc', label: 'NOC', icon: Radio },
   { path: '/ingest', label: 'Ingest', icon: FileText },
+  { path: '/callsheet', label: 'Call Sheet', icon: Film },
 ];
 
 export const Layout = ({ children }: LayoutProps) => {
