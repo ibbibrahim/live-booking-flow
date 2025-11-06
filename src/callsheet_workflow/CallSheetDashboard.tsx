@@ -100,7 +100,7 @@ const CallSheetDashboard = () => {
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/callsheet/${sheet.id}`);
+                          navigate(`/callsheet/${sheet.id}/edit`);
                         }}
                       >
                         <Edit className="h-4 w-4" />

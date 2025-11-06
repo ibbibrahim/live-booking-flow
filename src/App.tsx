@@ -15,6 +15,7 @@ import NOC from "./pages/NOC";
 import Ingest from "./pages/Ingest";
 import CallSheetDashboard from "./callsheet_workflow/CallSheetDashboard";
 import CallSheetForm from "./callsheet_workflow/CallSheetForm";
+import CallSheetDetail from "./callsheet_workflow/CallSheetDetail";
 
 const queryClient = new QueryClient();
 
@@ -34,9 +35,10 @@ const App = () => (
         <Route path="/booking" element={<Booking />} />
         <Route path="/noc" element={<NOC />} />
         <Route path="/ingest" element={<Ingest />} />
-        <Route path="/callsheet" element={<CallSheetDashboard />} />
-        <Route path="/callsheet/new" element={<CallSheetForm />} />
-        <Route path="/callsheet/:id" element={<CallSheetForm />} />
+          <Route path="/callsheet" element={<CallSheetDashboard />} />
+          <Route path="/callsheet/new" element={<CallSheetForm />} />
+          <Route path="/callsheet/:id" element={<CallSheetDetail />} />
+          <Route path="/callsheet/:id/edit" element={<CallSheetForm />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
