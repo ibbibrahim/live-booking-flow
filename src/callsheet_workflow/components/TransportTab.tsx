@@ -167,50 +167,191 @@ export const TransportTab = ({
             Print / Save PDF
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="border rounded-lg p-6 bg-muted/30 space-y-4">
-            <div className="text-center border-b pb-4">
-              <h3 className="text-2xl font-bold">Call Sheet</h3>
-              <p className="text-muted-foreground">{callSheetData.title}</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="font-semibold">Department:</p>
-                <p>{callSheetData.department || '—'}</p>
+        <CardContent>
+          <div className="border rounded-lg p-8 bg-background space-y-6 print:border-none">
+            {/* Header Section */}
+            <div className="grid grid-cols-3 gap-4 items-start border-b pb-4">
+              <div className="text-sm">
+                <p className="font-semibold">Production Company:</p>
+                <p className="text-muted-foreground">{callSheetData.department || '—'}</p>
               </div>
-              <div>
-                <p className="font-semibold">Filming Date:</p>
-                <p>{callSheetData.filmingDate || '—'}</p>
+              <div className="text-center">
+                <h3 className="text-3xl font-bold">Call Time</h3>
+                <p className="text-lg font-semibold mt-2">{callSheetData.callTime || '—'}</p>
+                <p className="text-sm text-muted-foreground italic mt-1">Please Check Individual Call Times</p>
               </div>
-              <div>
-                <p className="font-semibold">Call Time:</p>
-                <p>{callSheetData.callTime || '—'}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Wrap Time:</p>
-                <p>{callSheetData.wrapTime || '—'}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Location:</p>
-                <p>{callSheetData.location || '—'}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Focal Point:</p>
-                <p>{callSheetData.focalPoint || '—'}</p>
+              <div className="text-sm text-right">
+                <p><span className="font-semibold">Weather:</span> —</p>
+                <p><span className="font-semibold">Sunrise:</span> —</p>
+                <p><span className="font-semibold">Sunset:</span> —</p>
+                <p><span className="font-semibold">Nearest Hospital:</span> —</p>
               </div>
             </div>
 
+            {/* Client & Day Info */}
+            <div className="grid grid-cols-3 gap-4 text-sm border-b pb-4">
+              <div className="space-y-1">
+                <p><span className="font-semibold">Client:</span> —</p>
+                <p><span className="font-semibold">Agency:</span> —</p>
+                <p><span className="font-semibold">Producer:</span> {callSheetData.focalPoint || '—'}</p>
+                <p><span className="font-semibold">Director:</span> —</p>
+                <p><span className="font-semibold">Tel AD:</span> {callSheetData.focalContact || '—'}</p>
+              </div>
+              <div className="text-center">
+                <p className="font-semibold">Day __ of __</p>
+              </div>
+              <div className="space-y-1 text-right">
+                <p><span className="font-semibold">Client Call:</span> —</p>
+                <p><span className="font-semibold">Agency Call:</span> —</p>
+                <p><span className="font-semibold">Crew Call:</span> {callSheetData.callTime || '—'}</p>
+                <p><span className="font-semibold">First Shot:</span> —</p>
+                <p><span className="font-semibold">Last Wrap:</span> {callSheetData.wrapTime || '—'}</p>
+              </div>
+            </div>
+
+            {/* Locations Table */}
+            <div>
+              <h4 className="text-lg font-bold text-center mb-3">Locations</h4>
+              <table className="w-full border-collapse border border-border text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="border border-border p-2 text-left w-12">#</th>
+                    <th className="border border-border p-2 text-left">Location</th>
+                    <th className="border border-border p-2 text-left">Address</th>
+                    <th className="border border-border p-2 text-left">Parking & Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-border p-2">1</td>
+                    <td className="border border-border p-2">{callSheetData.location || '—'}</td>
+                    <td className="border border-border p-2">—</td>
+                    <td className="border border-border p-2">—</td>
+                  </tr>
+                  {[...Array(3)].map((_, i) => (
+                    <tr key={i}>
+                      <td className="border border-border p-2">&nbsp;</td>
+                      <td className="border border-border p-2">&nbsp;</td>
+                      <td className="border border-border p-2">&nbsp;</td>
+                      <td className="border border-border p-2">&nbsp;</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Crew Contacts Table */}
+            <div>
+              <h4 className="text-lg font-bold text-center mb-3">Crew Contacts</h4>
+              <table className="w-full border-collapse border border-border text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="border border-border p-2 text-left">Role</th>
+                    <th className="border border-border p-2 text-left">Name</th>
+                    <th className="border border-border p-2 text-left">Contact Info</th>
+                    <th className="border border-border p-2 text-left">Call Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {callSheetData.assignments && callSheetData.assignments.length > 0 ? (
+                    callSheetData.assignments.map((assignment: any, i: number) => (
+                      <tr key={i}>
+                        <td className="border border-border p-2">{assignment.role}</td>
+                        <td className="border border-border p-2">{assignment.name}</td>
+                        <td className="border border-border p-2">{assignment.phone}</td>
+                        <td className="border border-border p-2">{callSheetData.callTime || '—'}</td>
+                      </tr>
+                    ))
+                  ) : null}
+                  {[...Array(Math.max(5 - (callSheetData.assignments?.length || 0), 0))].map((_, i) => (
+                    <tr key={`empty-${i}`}>
+                      <td className="border border-border p-2">&nbsp;</td>
+                      <td className="border border-border p-2">&nbsp;</td>
+                      <td className="border border-border p-2">&nbsp;</td>
+                      <td className="border border-border p-2">&nbsp;</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Schedule and Talent Section */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-lg font-bold text-center mb-3">Schedule</h4>
+                <table className="w-full border-collapse border border-border text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="border border-border p-2 text-left w-24">Time</th>
+                      <th className="border border-border p-2 text-left">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(8)].map((_, i) => (
+                      <tr key={i}>
+                        <td className="border border-border p-2">&nbsp;</td>
+                        <td className="border border-border p-2">&nbsp;</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-center mb-3">Talent</h4>
+                <table className="w-full border-collapse border border-border text-sm mb-4">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="border border-border p-2 text-left">Name</th>
+                      <th className="border border-border p-2 text-left w-24">Call Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(5)].map((_, i) => (
+                      <tr key={i}>
+                        <td className="border border-border p-2">&nbsp;</td>
+                        <td className="border border-border p-2">&nbsp;</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div>
+                  <h5 className="font-bold text-center mb-2">Notes</h5>
+                  <div className="border border-border p-4 min-h-[100px] bg-muted/20">
+                    <p className="text-sm text-muted-foreground">—</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Equipment Section */}
             {callSheetData.equipment && callSheetData.equipment.length > 0 && (
               <div className="border-t pt-4">
-                <p className="font-semibold mb-2">Equipment Required:</p>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  {callSheetData.equipment.map((eq: any, i: number) => (
-                    <li key={i}>{eq.quantity}× {eq.item} ({eq.category})</li>
-                  ))}
-                </ul>
+                <h4 className="text-lg font-bold mb-3">Equipment Required</h4>
+                <table className="w-full border-collapse border border-border text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="border border-border p-2 text-left">Category</th>
+                      <th className="border border-border p-2 text-left">Item</th>
+                      <th className="border border-border p-2 text-left w-20">Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {callSheetData.equipment.map((eq: any, i: number) => (
+                      <tr key={i}>
+                        <td className="border border-border p-2">{eq.category}</td>
+                        <td className="border border-border p-2">{eq.item}</td>
+                        <td className="border border-border p-2">{eq.quantity}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
+
+            {/* Footer */}
+            <div className="text-center text-xs text-muted-foreground border-t pt-4">
+              <p>Download Call Sheet Template: tv.kcap-inc.com/call-sheet</p>
+            </div>
           </div>
         </CardContent>
       </Card>
