@@ -16,6 +16,7 @@ import Ingest from "./pages/Ingest";
 import CallSheetDashboard from "./callsheet_workflow/CallSheetDashboard";
 import CallSheetForm from "./callsheet_workflow/CallSheetForm";
 import CallSheetDetail from "./callsheet_workflow/CallSheetDetail";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
         <Route path="/" element={<Index />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/requests" element={<Dashboard />} />
         <Route path="/request/new" element={<RequestForm />} />
         <Route path="/request/:id" element={<RequestDetail />} />
