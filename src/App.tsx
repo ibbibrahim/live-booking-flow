@@ -16,6 +16,7 @@ import Ingest from "./pages/Ingest";
 import CallSheetDashboard from "./callsheet_workflow/CallSheetDashboard";
 import CallSheetForm from "./callsheet_workflow/CallSheetForm";
 import CallSheetDetail from "./callsheet_workflow/CallSheetDetail";
+import CallSheetAnalytics from "./pages/CallSheetAnalytics";
 import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/callsheet/new" element={<CallSheetForm />} />
           <Route path="/callsheet/:id" element={<CallSheetDetail />} />
           <Route path="/callsheet/:id/edit" element={<CallSheetForm />} />
+          <Route path="/callsheet/analytics" element={<CallSheetAnalytics />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
