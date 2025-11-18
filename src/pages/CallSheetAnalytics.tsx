@@ -422,10 +422,10 @@ export default function CallSheetAnalytics() {
           </CardContent>
         </Card>
 
-        {/* Analytics Content - Dynamic Cards */}
+        {/* Analytics Content - Two Column Layout when crew members are selected */}
         {selectedCrewMembers.length === 0 ? (
-          // General Analytics
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          // General Analytics - Full Width
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Call Sheets</CardTitle>
@@ -441,12 +441,12 @@ export default function CallSheetAnalytics() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Active Crew Members</CardTitle>
+                <CardTitle className="text-sm font-medium">Unique Crew Members</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{analytics.uniqueCrewMembers}</div>
-                <p className="text-xs text-muted-foreground">Across all departments</p>
+                <p className="text-xs text-muted-foreground">Active members</p>
               </CardContent>
             </Card>
 
@@ -471,120 +471,119 @@ export default function CallSheetAnalytics() {
                 <p className="text-xs text-muted-foreground">On-time completions</p>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Duration</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.avgDuration}h</div>
-                <p className="text-xs text-muted-foreground">Per call sheet</p>
-              </CardContent>
-            </Card>
           </div>
-        ) : null}
-
-        {/* Crew Member Detailed Statistics */}
-        {crewMemberDetailedStats && (
-          <>
-            {/* Combined Stats */}
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Combined Statistics ({selectedCrewMembers.length} {selectedCrewMembers.length === 1 ? 'Member' : 'Members'})
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Aggregated work hours and performance metrics
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Total Hours Worked (Combined)</span>
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="text-3xl font-bold">{crewMemberDetailedStats.combinedTotalHours.toFixed(1)}h</div>
+        ) : (
+          // Two Column Layout - Summary Cards on Left, Individual Stats on Right
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Left Column - Summary Cards */}
+            <div className="space-y-4">
+              {/* General Analytics Cards */}
+              <div className="grid gap-3 grid-cols-2">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xs font-medium">Total Call Sheets</CardTitle>
+                    <BarChart3 className="h-3 w-3 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="text-xl font-bold">{analytics.totalCallSheets}</div>
                     <p className="text-xs text-muted-foreground">
-                      Across all selected crew members
+                      {hasActiveFilters ? 'Matching' : 'All'}
                     </p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Average Hours per Member</span>
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="text-3xl font-bold">{crewMemberDetailedStats.avgHoursPerMember.toFixed(1)}h</div>
-                    <p className="text-xs text-muted-foreground">
-                      {crewMemberDetailedStats.combinedTotalHours.toFixed(1)}h ÷ {selectedCrewMembers.length} members
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
 
-            {/* Individual Member Stats */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xs font-medium">Total Time</CardTitle>
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="text-xl font-bold">{crewMemberDetailedStats?.combinedTotalHours.toFixed(1)}h</div>
+                    <p className="text-xs text-muted-foreground">Combined</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xs font-medium">Avg Time</CardTitle>
+                    <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="text-xl font-bold">{crewMemberDetailedStats?.avgHoursPerMember.toFixed(1)}h</div>
+                    <p className="text-xs text-muted-foreground">Per member</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xs font-medium">Active Members</CardTitle>
+                    <Users className="h-3 w-3 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="text-xl font-bold">{selectedCrewMembers.length}</div>
+                    <p className="text-xs text-muted-foreground">Selected</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Right Column - Individual Member Stats */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="h-4 w-4" />
                   Individual Member Statistics
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Detailed breakdown for each selected crew member
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {crewMemberDetailedStats.individualStats.map((stat, index) => (
+                <div className="space-y-3">
+                  {crewMemberDetailedStats?.individualStats.map((stat, index) => (
                     <div
                       key={stat.name}
-                      className={cn(
-                        "border rounded-lg p-4 space-y-3 transition-colors hover:bg-accent/50",
-                        index !== crewMemberDetailedStats.individualStats.length - 1 && "mb-4"
-                      )}
+                      className="border rounded-lg p-3 space-y-2 bg-card transition-colors hover:bg-accent/50"
                     >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-lg">{stat.name}</h4>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold text-sm truncate">{stat.name}</h4>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {stat.roles.map((role) => (
-                              <Badge key={role} variant="outline" className="text-xs">
+                              <Badge key={role} variant="outline" className="text-xs h-5">
                                 {role}
                               </Badge>
                             ))}
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                          Member {index + 1} of {selectedCrewMembers.length}
+                        <Badge variant="secondary" className="text-xs shrink-0">
+                          {index + 1}/{selectedCrewMembers.length}
                         </Badge>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm">Total Assignments</span>
+                      <div className="grid grid-cols-3 gap-2 pt-1">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            <span className="text-xs">Assignments</span>
                           </div>
-                          <div className="text-2xl font-bold">{stat.totalAssignments}</div>
-                          <p className="text-xs text-muted-foreground">Call sheets worked</p>
+                          <div className="text-lg font-bold">{stat.totalAssignments}</div>
+                          <p className="text-xs text-muted-foreground">Call sheets</p>
                         </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span className="text-sm">Total Hours</span>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span className="text-xs">Total Hours</span>
                           </div>
-                          <div className="text-2xl font-bold">{stat.totalHoursWorked.toFixed(1)}h</div>
+                          <div className="text-lg font-bold">{stat.totalHoursWorked.toFixed(1)}h</div>
                           <p className="text-xs text-muted-foreground">Time worked</p>
                         </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <TrendingUp className="h-4 w-4" />
-                            <span className="text-sm">Average Duration</span>
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <TrendingUp className="h-3 w-3" />
+                            <span className="text-xs">Avg</span>
                           </div>
-                          <div className="text-2xl font-bold">{stat.avgDurationPerCallsheet.toFixed(1)}h</div>
-                          <p className="text-xs text-muted-foreground">Per call sheet</p>
+                          <div className="text-lg font-bold">{stat.avgDurationPerCallsheet.toFixed(1)}h</div>
+                          <p className="text-xs text-muted-foreground">Per sheet</p>
                         </div>
                       </div>
                     </div>
@@ -592,7 +591,7 @@ export default function CallSheetAnalytics() {
                 </div>
               </CardContent>
             </Card>
-          </>
+          </div>
         )}
 
         {/* Main Analytics Area - Call Sheets List */}
