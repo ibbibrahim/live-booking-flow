@@ -167,42 +167,56 @@ export default function CallSheetAnalytics() {
     const completionRate = totalCallSheets > 0 ? Math.round((completedCount / totalCallSheets) * 100) : 0;
     const avgDuration = totalCallSheets > 0 ? (totalDuration / totalCallSheets).toFixed(1) : '0';
 
-    // If filtering by specific crew member(s), calculate their stats
-    let crewMemberStats = null;
-    if (selectedCrewMembers.length > 0) {
-      const memberSheets = filteredCallSheets.filter(sheet =>
-        sheet.crew.some(member => selectedCrewMembers.includes(member.name))
-      );
-      
-      const totalAssignments = memberSheets.length;
-      const uniquePrograms = new Set(memberSheets.map(s => s.program)).size;
-      const totalHoursWorked = memberSheets.reduce((sum, sheet) => sum + sheet.duration, 0);
-      const rolesWorked = new Set<string>();
-      
-      memberSheets.forEach(sheet => {
-        sheet.crew.forEach(member => {
-          if (selectedCrewMembers.includes(member.name)) {
-            rolesWorked.add(member.role);
-          }
-        });
-      });
-
-      crewMemberStats = {
-        totalAssignments,
-        uniquePrograms,
-        totalHoursWorked,
-        rolesWorked: Array.from(rolesWorked),
-        avgHoursPerAssignment: totalAssignments > 0 ? (totalHoursWorked / totalAssignments).toFixed(1) : '0',
-      };
-    }
-
     return {
       totalCallSheets,
       uniqueCrewMembers: uniqueCrewMembers.size,
       avgCrewSize,
       completionRate,
       avgDuration,
-      crewMemberStats,
+    };
+  }, [filteredCallSheets]);
+
+  // Calculate detailed crew member statistics when members are selected
+  const crewMemberDetailedStats = useMemo(() => {
+    if (selectedCrewMembers.length === 0) return null;
+
+    // Individual stats for each selected member
+    const individualStats = selectedCrewMembers.map(memberName => {
+      const memberSheets = filteredCallSheets.filter(sheet =>
+        sheet.crew.some(crew => crew.name === memberName)
+      );
+
+      const totalAssignments = memberSheets.length;
+      const totalHoursWorked = memberSheets.reduce((sum, sheet) => sum + sheet.duration, 0);
+      const avgDurationPerCallsheet = totalAssignments > 0 ? totalHoursWorked / totalAssignments : 0;
+
+      // Get all roles this member worked in
+      const roles = new Set<string>();
+      memberSheets.forEach(sheet => {
+        sheet.crew.forEach(crew => {
+          if (crew.name === memberName) {
+            roles.add(crew.role);
+          }
+        });
+      });
+
+      return {
+        name: memberName,
+        totalAssignments,
+        totalHoursWorked,
+        avgDurationPerCallsheet,
+        roles: Array.from(roles),
+      };
+    });
+
+    // Combined stats for all selected members
+    const combinedTotalHours = individualStats.reduce((sum, stat) => sum + stat.totalHoursWorked, 0);
+    const avgHoursPerMember = combinedTotalHours / selectedCrewMembers.length;
+
+    return {
+      individualStats,
+      combinedTotalHours,
+      avgHoursPerMember,
     };
   }, [filteredCallSheets, selectedCrewMembers]);
 
@@ -409,56 +423,7 @@ export default function CallSheetAnalytics() {
         </Card>
 
         {/* Analytics Content - Dynamic Cards */}
-        {selectedCrewMembers.length > 0 && analytics.crewMemberStats ? (
-          // Crew Member Specific Analytics
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Assignments</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.crewMemberStats.totalAssignments}</div>
-                <p className="text-xs text-muted-foreground">
-                  {selectedCrewMembers.length === 1 ? 'For selected crew member' : `For ${selectedCrewMembers.length} members`}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Programs Worked</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.crewMemberStats.uniquePrograms}</div>
-                <p className="text-xs text-muted-foreground">Different programs</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Hours Worked</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.crewMemberStats.totalHoursWorked}h</div>
-                <p className="text-xs text-muted-foreground">Avg. {analytics.crewMemberStats.avgHoursPerAssignment}h per assignment</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Roles Performed</CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.crewMemberStats.rolesWorked.length}</div>
-                <p className="text-xs text-muted-foreground">{analytics.crewMemberStats.rolesWorked.join(', ')}</p>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
+        {selectedCrewMembers.length === 0 ? (
           // General Analytics
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
@@ -518,6 +483,116 @@ export default function CallSheetAnalytics() {
               </CardContent>
             </Card>
           </div>
+        ) : null}
+
+        {/* Crew Member Detailed Statistics */}
+        {crewMemberDetailedStats && (
+          <>
+            {/* Combined Stats */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Combined Statistics ({selectedCrewMembers.length} {selectedCrewMembers.length === 1 ? 'Member' : 'Members'})
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Aggregated work hours and performance metrics
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Total Hours Worked (Combined)</span>
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="text-3xl font-bold">{crewMemberDetailedStats.combinedTotalHours.toFixed(1)}h</div>
+                    <p className="text-xs text-muted-foreground">
+                      Across all selected crew members
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Average Hours per Member</span>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="text-3xl font-bold">{crewMemberDetailedStats.avgHoursPerMember.toFixed(1)}h</div>
+                    <p className="text-xs text-muted-foreground">
+                      {crewMemberDetailedStats.combinedTotalHours.toFixed(1)}h ÷ {selectedCrewMembers.length} members
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Individual Member Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Individual Member Statistics
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Detailed breakdown for each selected crew member
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {crewMemberDetailedStats.individualStats.map((stat, index) => (
+                    <div
+                      key={stat.name}
+                      className={cn(
+                        "border rounded-lg p-4 space-y-3 transition-colors hover:bg-accent/50",
+                        index !== crewMemberDetailedStats.individualStats.length - 1 && "mb-4"
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-semibold text-lg">{stat.name}</h4>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {stat.roles.map((role) => (
+                              <Badge key={role} variant="outline" className="text-xs">
+                                {role}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          Member {index + 1} of {selectedCrewMembers.length}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm">Total Assignments</span>
+                          </div>
+                          <div className="text-2xl font-bold">{stat.totalAssignments}</div>
+                          <p className="text-xs text-muted-foreground">Call sheets worked</p>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span className="text-sm">Total Hours</span>
+                          </div>
+                          <div className="text-2xl font-bold">{stat.totalHoursWorked.toFixed(1)}h</div>
+                          <p className="text-xs text-muted-foreground">Time worked</p>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <TrendingUp className="h-4 w-4" />
+                            <span className="text-sm">Average Duration</span>
+                          </div>
+                          <div className="text-2xl font-bold">{stat.avgDurationPerCallsheet.toFixed(1)}h</div>
+                          <p className="text-xs text-muted-foreground">Per call sheet</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )}
 
         {/* Main Analytics Area - Call Sheets List */}
