@@ -70,13 +70,13 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
         <div className="flex">
           {/* Presets sidebar */}
           <div className="border-r border-border">
-            <div className="p-3 space-y-1 min-w-[140px]">
+            <div className="p-2 space-y-0.5 min-w-[120px]">
               {presets.map((preset) => (
                 <Button
                   key={preset.label}
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start text-sm font-normal hover:bg-accent"
+                  className="w-full justify-start text-xs font-normal hover:bg-accent h-8 px-2"
                   onClick={() => handlePresetClick(preset)}
                 >
                   {preset.label}
