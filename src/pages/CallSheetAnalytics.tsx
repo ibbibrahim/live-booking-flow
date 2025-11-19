@@ -529,8 +529,8 @@ export default function CallSheetAnalytics() {
 
             {/* Right Column - Individual Member Stats */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
                   <Target className="h-4 w-4" />
                   Individual Member Statistics
                 </CardTitle>
@@ -538,52 +538,57 @@ export default function CallSheetAnalytics() {
                   Detailed breakdown for each selected crew member
                 </p>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="p-3">
+                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                   {crewMemberDetailedStats?.individualStats.map((stat, index) => (
                     <div
                       key={stat.name}
-                      className="border rounded-lg p-3 space-y-2 bg-card transition-colors hover:bg-accent/50"
+                      className="border rounded-md p-2.5 bg-muted/30 hover:bg-muted/50 transition-colors"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
+                      {/* Header Row */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <h4 className="font-semibold text-sm truncate">{stat.name}</h4>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {stat.roles.map((role) => (
-                              <Badge key={role} variant="outline" className="text-xs h-5">
-                                {role}
-                              </Badge>
-                            ))}
-                          </div>
+                          <Badge variant="secondary" className="text-[10px] h-4 px-1.5 shrink-0">
+                            {index + 1}/{selectedCrewMembers.length}
+                          </Badge>
                         </div>
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          {index + 1}/{selectedCrewMembers.length}
-                        </Badge>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 pt-1">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1 text-muted-foreground">
+                      
+                      {/* Roles Row */}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {stat.roles.map((role) => (
+                          <Badge key={role} variant="outline" className="text-[10px] h-4 px-1.5 py-0">
+                            {role}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      {/* Stats Grid - Compact 3 Column Layout */}
+                      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/50">
+                        <div>
+                          <div className="flex items-center gap-1 text-muted-foreground mb-0.5">
                             <Calendar className="h-3 w-3" />
-                            <span className="text-xs">Assignments</span>
+                            <span className="text-[10px]">Assignments</span>
                           </div>
-                          <div className="text-lg font-bold">{stat.totalAssignments}</div>
-                          <p className="text-xs text-muted-foreground">Call sheets</p>
+                          <div className="text-base font-bold leading-none">{stat.totalAssignments}</div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Call sheets</p>
                         </div>
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1 text-muted-foreground">
+                        <div>
+                          <div className="flex items-center gap-1 text-muted-foreground mb-0.5">
                             <Clock className="h-3 w-3" />
-                            <span className="text-xs">Total Hours</span>
+                            <span className="text-[10px]">Total Hours</span>
                           </div>
-                          <div className="text-lg font-bold">{stat.totalHoursWorked.toFixed(1)}h</div>
-                          <p className="text-xs text-muted-foreground">Time worked</p>
+                          <div className="text-base font-bold leading-none">{stat.totalHoursWorked.toFixed(1)}h</div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Time worked</p>
                         </div>
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1 text-muted-foreground">
+                        <div>
+                          <div className="flex items-center gap-1 text-muted-foreground mb-0.5">
                             <TrendingUp className="h-3 w-3" />
-                            <span className="text-xs">Avg</span>
+                            <span className="text-[10px]">Avg</span>
                           </div>
-                          <div className="text-lg font-bold">{stat.avgDurationPerCallsheet.toFixed(1)}h</div>
-                          <p className="text-xs text-muted-foreground">Per sheet</p>
+                          <div className="text-base font-bold leading-none">{stat.avgDurationPerCallsheet.toFixed(1)}h</div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Per sheet</p>
                         </div>
                       </div>
                     </div>
