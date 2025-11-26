@@ -4,8 +4,9 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, RefreshCw, Grid, List, Filter, Download, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Search, RefreshCw, Filter, Download, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { WorkflowState, Priority } from '@/types/workflow';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -20,9 +21,6 @@ const Dashboard = () => {
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchRequests();
@@ -81,11 +79,21 @@ const Dashboard = () => {
   };
 
   const filteredRequests = getFilteredRequests();
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
-  const paginatedRequests = filteredRequests.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
+  const workflowStates: WorkflowState[] = [
+    'Draft',
+    'Submitted',
+    'With NOC',
+    'Clarification Requested',
+    'Resources Added',
+    'With Ingest',
+    'Completed',
+    'Not Done'
+  ];
+
+  const getRequestsByState = (state: WorkflowState) => {
+    return filteredRequests.filter(req => req.state === state);
+  };
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this request?')) {
@@ -132,20 +140,6 @@ const Dashboard = () => {
         <div className="bg-muted/50 rounded-lg p-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-wrap gap-2">
-              <Button 
-                variant={viewMode === 'grid' ? 'default' : 'outline'} 
-                size="icon"
-                onClick={() => setViewMode('grid')}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant={viewMode === 'list' ? 'default' : 'outline'} 
-                size="icon"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
               <Select value={filterState} onValueChange={(val) => setFilterState(val as WorkflowState | 'All')}>
                 <SelectTrigger className="w-[160px]">
                   <Filter className="h-4 w-4 mr-2" />
@@ -180,114 +174,93 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-card rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Program</TableHead>
-                <TableHead>Air Date</TableHead>
-                <TableHead>State</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedRequests.map((request) => (
-                <TableRow 
-                  key={request.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => navigate(`/request/${request.id}`)}
-                >
-                  <TableCell className="font-mono text-xs">{request.id?.slice(0, 8)}</TableCell>
-                  <TableCell className="font-medium">{request.title}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{request.program_segment}</TableCell>
-                  <TableCell className="text-sm">
-                    {format(new Date(request.air_date_time), 'MM/dd/yyyy')}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={request.state} />
-                  </TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      request.priority === 'Urgent' 
-                        ? 'bg-warning/10 text-warning' 
-                        : request.priority === 'High'
-                        ? 'bg-accent/10 text-accent'
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {request.priority}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/request/${request.id}`);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(request.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {paginatedRequests.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                    No requests found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {filteredRequests.length > 0 
-              ? `${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filteredRequests.length)} of ${filteredRequests.length}`
-              : '0 results'}
-          </p>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm">
-              Page {currentPage} of {totalPages || 1}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        {/* Kanban Board */}
+        <ScrollArea className="w-full">
+          <div className="flex gap-4 pb-4 min-w-max">
+            {workflowStates.map((state) => {
+              const stateRequests = getRequestsByState(state);
+              
+              return (
+                <div key={state} className="flex-shrink-0 w-[320px]">
+                  <Card className="h-full bg-muted/30">
+                    <CardHeader className="pb-3 space-y-0">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase">
+                          {state}
+                        </CardTitle>
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                          {stateRequests.length}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <ScrollArea className="h-[calc(100vh-320px)]">
+                        <div className="space-y-2 pr-4">
+                          {stateRequests.map((request) => (
+                            <Card 
+                              key={request.id}
+                              className="cursor-pointer hover:shadow-md transition-shadow bg-card"
+                              onClick={() => navigate(`/request/${request.id}`)}
+                            >
+                              <CardContent className="p-3 space-y-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h4 className="text-sm font-medium leading-tight line-clamp-2">
+                                    {request.title}
+                                  </h4>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 flex-shrink-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <MoreHorizontal className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                                
+                                <div className="space-y-1.5">
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {request.program_segment}
+                                  </p>
+                                  
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      {format(new Date(request.air_date_time), 'MMM dd, yyyy')}
+                                    </span>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                      request.priority === 'Urgent' 
+                                        ? 'bg-warning/10 text-warning' 
+                                        : request.priority === 'High'
+                                        ? 'bg-accent/10 text-accent'
+                                        : 'bg-muted text-muted-foreground'
+                                    }`}>
+                                      {request.priority}
+                                    </span>
+                                  </div>
+                                  
+                                  <p className="text-xs font-mono text-muted-foreground">
+                                    {request.id?.slice(0, 8)}
+                                  </p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                          
+                          {stateRequests.length === 0 && (
+                            <div className="text-center py-8 text-sm text-muted-foreground">
+                              No requests
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        </ScrollArea>
       </div>
     </Layout>
   );
