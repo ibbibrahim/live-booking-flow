@@ -1,134 +1,108 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-
-interface CallSheet {
-  id: string;
-  title: string;
-  department: string;
-  filmingDate: string;
-  location: string;
-  status: 'Draft' | 'Submitted' | 'Approved';
-}
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ClipboardList, Wrench } from 'lucide-react';
+import { toast } from 'sonner';
+import { CallsheetRequest, RoleType } from './types';
+import { initialCallsheetRequests } from './callsheetStore';
+import { CallsheetCreateForm } from './components/CallsheetCreateForm';
+import { CallsheetList } from './components/CallsheetList';
+import { CallsheetDetailPanel } from './components/CallsheetDetailPanel';
 
 const CallSheetDashboard = () => {
-  const navigate = useNavigate();
-  const [callSheets, setCallSheets] = useState<CallSheet[]>([
-    {
-      id: '1',
-      title: 'News Segment - City Hall',
-      department: 'News',
-      filmingDate: '2025-11-15',
-      location: 'City Hall',
-      status: 'Approved',
-    },
-    {
-      id: '2',
-      title: 'Sports Interview',
-      department: 'Sports',
-      filmingDate: '2025-11-16',
-      location: 'Stadium',
-      status: 'Submitted',
-    },
-  ]);
+  const [currentRole, setCurrentRole] = useState<RoleType>('Callsheet');
+  const [requests, setRequests] = useState<CallsheetRequest[]>(initialCallsheetRequests);
+  const [selectedRequest, setSelectedRequest] = useState<CallsheetRequest | null>(null);
 
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this call sheet?')) {
-      setCallSheets(prev => prev.filter(sheet => sheet.id !== id));
-    }
+  const handleCreateRequest = (newRequest: Omit<CallsheetRequest, 'id' | 'equipmentAssigned' | 'status' | 'lastActionBy' | 'lastComment'>) => {
+    const status = newRequest.driverNeeded ? 'PendingTechnical' : 'Completed';
+    const request: CallsheetRequest = {
+      ...newRequest,
+      id: Math.max(0, ...requests.map(r => r.id)) + 1,
+      equipmentAssigned: [...newRequest.equipmentRequested],
+      status,
+      lastActionBy: 'Callsheet',
+      lastComment: '',
+    };
+    setRequests(prev => [request, ...prev]);
+    toast.success(
+      status === 'Completed' 
+        ? 'Callsheet created and completed (no driver needed)' 
+        : 'Callsheet created and sent to Technical Store'
+    );
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Draft': return 'bg-muted text-muted-foreground';
-      case 'Submitted': return 'bg-accent/10 text-accent';
-      case 'Approved': return 'bg-success/10 text-success';
-      default: return 'bg-muted text-muted-foreground';
-    }
+  const handleUpdateRequest = (updatedRequest: CallsheetRequest) => {
+    setRequests(prev => prev.map(r => r.id === updatedRequest.id ? updatedRequest : r));
+    toast.success('Request updated successfully');
+  };
+
+  const handleSelectRequest = (request: CallsheetRequest) => {
+    setSelectedRequest(request);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedRequest(null);
   };
 
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        {/* Header with Role Toggle */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-3xl font-bold text-foreground">Call Sheet Workflow</h2>
-            <p className="text-muted-foreground mt-1">Manage call sheets, equipment, and transportation requests</p>
+            <p className="text-muted-foreground mt-1">
+              {currentRole === 'Callsheet' 
+                ? 'Create and manage your callsheet requests' 
+                : 'Review and assign equipment for callsheet requests'}
+            </p>
           </div>
-          <Button onClick={() => navigate('/callsheet/new')} className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Call Sheet
-          </Button>
+          <Tabs value={currentRole} onValueChange={(v) => {
+            setCurrentRole(v as RoleType);
+            setSelectedRequest(null);
+          }}>
+            <TabsList>
+              <TabsTrigger value="Callsheet" className="gap-2">
+                <ClipboardList className="h-4 w-4" />
+                View as Callsheet
+              </TabsTrigger>
+              <TabsTrigger value="TechnicalStore" className="gap-2">
+                <Wrench className="h-4 w-4" />
+                View as Technical Store
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
-        <div className="bg-card rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Filming Date</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {callSheets.map((sheet) => (
-                <TableRow 
-                  key={sheet.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => navigate(`/callsheet/${sheet.id}`)}
-                >
-                  <TableCell className="font-medium">{sheet.title}</TableCell>
-                  <TableCell>{sheet.department}</TableCell>
-                  <TableCell>{format(new Date(sheet.filmingDate), 'MM/dd/yyyy')}</TableCell>
-                  <TableCell>{sheet.location}</TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(sheet.status)}`}>
-                      {sheet.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/callsheet/${sheet.id}/edit`);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(sheet.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {callSheets.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                    No call sheets found. Create your first one!
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        {/* Main Content */}
+        {selectedRequest ? (
+          <CallsheetDetailPanel
+            request={selectedRequest}
+            currentRole={currentRole}
+            onClose={handleCloseDetail}
+            onUpdate={handleUpdateRequest}
+          />
+        ) : (
+          <div className="space-y-6">
+            {/* Create Form - Only for Callsheet view */}
+            {currentRole === 'Callsheet' && (
+              <CallsheetCreateForm onSubmit={handleCreateRequest} />
+            )}
+
+            {/* List */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                {currentRole === 'Callsheet' ? 'All Callsheets' : 'Pending Requests'}
+              </h3>
+              <CallsheetList
+                requests={requests}
+                onSelect={handleSelectRequest}
+                currentRole={currentRole}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

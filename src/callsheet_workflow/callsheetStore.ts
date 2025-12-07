@@ -1,0 +1,88 @@
+import { CallsheetRequest } from './types';
+
+// Seed data with different statuses to test the flow
+export const initialCallsheetRequests: CallsheetRequest[] = [
+  {
+    id: 1,
+    title: 'Morning News Shoot',
+    date: '2025-01-20',
+    createdBy: 'John Doe',
+    driverNeeded: true,
+    equipmentRequested: ['Camera A', 'Tripod', 'LED Lights', 'Wireless Mic'],
+    equipmentAssigned: ['Camera A', 'Tripod', 'LED Lights', 'Wireless Mic'],
+    status: 'PendingTechnical',
+    lastActionBy: 'Callsheet',
+    lastComment: '',
+  },
+  {
+    id: 2,
+    title: 'Evening Interview',
+    date: '2025-01-21',
+    createdBy: 'Jane Smith',
+    driverNeeded: true,
+    equipmentRequested: ['Camera B', 'Boom Mic', 'Reflector'],
+    equipmentAssigned: ['Camera C', 'Boom Mic', 'Softbox'], // Changed by technical
+    status: 'PendingRequesterApproval',
+    lastActionBy: 'TechnicalStore',
+    lastComment: 'Camera B unavailable, replaced with Camera C. Reflector replaced with Softbox.',
+  },
+  {
+    id: 3,
+    title: 'Documentary B-Roll',
+    date: '2025-01-22',
+    createdBy: 'Ahmed Ali',
+    driverNeeded: false,
+    equipmentRequested: ['Gimbal', 'Drone'],
+    equipmentAssigned: ['Gimbal', 'Drone'],
+    status: 'Completed',
+    lastActionBy: 'Callsheet',
+    lastComment: 'Approved as requested.',
+  },
+  {
+    id: 4,
+    title: 'Sports Coverage',
+    date: '2025-01-23',
+    createdBy: 'Sarah Johnson',
+    driverNeeded: true,
+    equipmentRequested: ['Camera A', 'Long Lens', 'Monopod'],
+    equipmentAssigned: ['Camera A', 'Medium Lens'], // Technical modified
+    status: 'ClarificationRequested',
+    lastActionBy: 'Callsheet',
+    lastComment: 'We need the long lens for distant shots. Please reconsider.',
+  },
+  {
+    id: 5,
+    title: 'Studio Recording',
+    date: '2025-01-24',
+    createdBy: 'Mike Brown',
+    driverNeeded: false,
+    equipmentRequested: ['Studio Lights', 'Backdrop'],
+    equipmentAssigned: ['Studio Lights', 'Backdrop'],
+    status: 'Completed',
+    lastActionBy: 'Callsheet',
+    lastComment: '',
+  },
+];
+
+// Available equipment options for the multi-select
+export const equipmentOptions = [
+  'Camera A',
+  'Camera B',
+  'Camera C',
+  'Tripod',
+  'Monopod',
+  'Gimbal',
+  'Drone',
+  'LED Lights',
+  'Studio Lights',
+  'Softbox',
+  'Reflector',
+  'Wireless Mic',
+  'Boom Mic',
+  'Lavalier Mic',
+  'Long Lens',
+  'Medium Lens',
+  'Wide Lens',
+  'Backdrop',
+  'Green Screen',
+];
